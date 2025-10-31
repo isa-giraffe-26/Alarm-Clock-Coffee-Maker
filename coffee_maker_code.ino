@@ -1,3 +1,4 @@
+
 #include <Wire.h>
 #include <RTClib.h>
 #include <TM1637Display.h>
@@ -47,10 +48,6 @@ void setup() {
 
 void loop() {
   DateTime now = rtc.now();
-
-
-
-
   int currentHour = now.hour();
   int currentMinute = now.minute();
   int timeToDisplay = currentHour * 100 + currentMinute;
@@ -101,21 +98,3 @@ void handleButtons() {
     delay(500);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
