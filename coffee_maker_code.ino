@@ -1,4 +1,3 @@
-
 #include <Wire.h>
 #include <RTClib.h>
 #include <TM1637Display.h>
@@ -10,6 +9,7 @@
 #define BTN_HOUR 3
 #define BTN_MIN 2
 #define SWITCH 10
+#define PUMP_RELAY 11
 
 
 RTC_DS1307 rtc;
@@ -36,11 +36,11 @@ void setup() {
   pinMode(BUZZER, OUTPUT);
   pinMode(BTN_HOUR, INPUT_PULLUP);
   pinMode(BTN_MIN, INPUT_PULLUP);
+  pinMode(PUMP_RELAY, OUTPUT);
 
 
   Serial.begin(9600);
   Serial.println("Alarm clock starting...");
-  // rtc.adjust(DateTime(F(__DATE__), F(__TIME__))); // Uncomment once if needed
   //alarmHour = 0;
   //alarmMinute = 0;
 }
@@ -51,16 +51,18 @@ void loop() {
   int currentHour = now.hour();
   int currentMinute = now.minute();
   int timeToDisplay = currentHour * 100 + currentMinute;
-  display.showNumberDecEx(timeToDisplay, 0b11100000, true); // HH:MM 
+  display.showNumberDecEx(timeToDisplay, 0b11100000, true); // HH:MM
 
   if (currentHour == alarmHour && currentMinute == alarmMinute) {
     alarmOn = true;
   }
   if (alarmOn && digitalRead(SWITCH) == LOW) {
     digitalWrite(BUZZER, HIGH);
+    digitalWrite(PUMP_RELAY, HIGH);
   }
   else if (alarmOn && digitalRead(SWITCH) == HIGH) {
     digitalWrite(BUZZER, LOW);
+    digitalWrite(PUMP_RELAY, LOW);
     alarmOn = false;
     alarmHour = (0);
     alarmMinute = (0);
@@ -69,18 +71,16 @@ void loop() {
     digitalWrite(BUZZER, LOW);
   }
 
+
   handleButtons();
-  delay(200); // Display update interval
+  delay(200);
 }
 
 
 void handleButtons() {
-  //int alarmDisplay = alarmHour * 100 + alarmMinute;
-  // Handle hour button
   if (digitalRead(BTN_HOUR) == LOW && millis() - lastHourPress > debounceDelay) {
     alarmHour = (alarmHour + 1) % 24;
     int alarmDisplay = alarmHour * 100 + alarmMinute;
-    //display.showNumberDecEx(alarmHour * 100 + 100, 0b11100000, true);
     display.showNumberDecEx(alarmDisplay, 0b11100000, true);
     lastHourPress = millis();
     Serial.print("Alarm Hour Set To: ");
